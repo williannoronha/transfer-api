@@ -20,6 +20,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import jakarta.validation.Valid;
 
+
+/**
+ * A classe ClienteController
+ * realiza a gestão de um novo Cliente
+ * embora apenas seja cadastrado um cliente e informações da conta
+ * e com isso temos apenas a visibilidade dessas informações, sem realizar outras persistências
+ * aqui deixa claro o funcionamento do conjunto de peças como Spring, H2 e objetos nativos do Java
+ * 
+ * @author Willian Noronha
+ * 
+ */
 @RestController
 @RequestMapping("/api/v1/clientes")
 public class ClienteController {

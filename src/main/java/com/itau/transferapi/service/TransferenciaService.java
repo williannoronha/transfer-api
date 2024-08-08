@@ -27,6 +27,15 @@ public class TransferenciaService {
 
     @Transactional
     public Transferencia createTransferencia(Transferencia transferencia) {
+    	
+    	if (transferencia.getValor() == null || transferencia.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("O valor da transferência deve ser maior que zero.");
+        }
+
+        if (transferencia.getValor().compareTo(new BigDecimal(10000)) > 0) {
+            throw new IllegalArgumentException("Valor da transferência excede o limite de R$ 10.000,00.");
+        }   
+    	
         Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferencia.getContaOrigem())
                 .orElseThrow(() -> new ResourceNotFoundException("Conta origem não encontrada"));
         Cliente contaDestino = clienteRepository.findByNumeroConta(transferencia.getContaDestino())
@@ -35,13 +44,9 @@ public class TransferenciaService {
         if (contaOrigem == null || contaDestino == null) {
             throw new IllegalArgumentException("Conta origem ou destino não encontrada.");
         }
-
-        if (transferencia.getValor().compareTo(new BigDecimal(10000)) > 0) {
-            throw new IllegalArgumentException("Valor da transferência excede o limite de R$ 10.000,00.");
-        }
         
-        if (transferencia.getValor().compareTo(new BigDecimal(0)) <= 0) {
-            new InsufficientFundsException("Necessário informar um valor para transferência.");
+        if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {
+            throw new InsufficientFundsException("Saldo insuficiente na conta de origem.");
         }
 
         if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {

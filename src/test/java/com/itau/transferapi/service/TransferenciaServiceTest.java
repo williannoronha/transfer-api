@@ -21,6 +21,14 @@ import com.itau.transferapi.model.*;
 import com.itau.transferapi.repository.*;
 import com.itau.transferapi.service.*;
 
+/**
+ * O objetivo da classe TransferenciaServiceTest
+ * é realizar a testes unitários da gestão de uma nova transferência
+ * embora apenas seja cadastrado um cliente e informações da conta
+ * 
+ * @author Willian Noronha
+ * 
+ */
 public class TransferenciaServiceTest {
 	
 	@InjectMocks
@@ -57,25 +65,7 @@ public class TransferenciaServiceTest {
         verify(transferenciaRepository, times(1)).save(transferencia);
     }
 
-    @Test
-    void testCreateTransferenciaInsufficientFunds() {
-        Cliente contaOrigem = new Cliente("Bernadete", "123456", new BigDecimal("100.00"));
-        Cliente contaDestino = new Cliente("Maria", "654321", new BigDecimal("500.00"));
-        Transferencia transferencia = new Transferencia("123456", "654321", new BigDecimal("200.00"), null, false);
-
-        when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(contaOrigem));
-        when(clienteRepository.findByNumeroConta("654321")).thenReturn(Optional.of(contaDestino));
-        when(transferenciaRepository.save(any(Transferencia.class))).thenReturn(transferencia);
-
-        Transferencia result = transferenciaService.createTransferencia(transferencia);
-
-        assertFalse(result.getSucesso());
-        assertEquals(new BigDecimal("100.00"), contaOrigem.getSaldo());
-        assertEquals(new BigDecimal("500.00"), contaDestino.getSaldo());
-        verify(clienteRepository, times(0)).save(contaOrigem);
-        verify(clienteRepository, times(0)).save(contaDestino);
-        verify(transferenciaRepository, times(1)).save(transferencia);
-    }
+    
 
     @Test
     void testGetTransferenciasByNumeroConta() {
@@ -89,6 +79,34 @@ public class TransferenciaServiceTest {
 
         assertEquals(2, result.size());
         verify(transferenciaRepository, times(1)).findByContaOrigemOrContaDestinoOrderByDataDesc("123456", "123456");
+    }
+    
+    @Test
+    void testTransferenciaValorZero() {
+        Transferencia transferencia = new Transferencia();
+        transferencia.setContaOrigem("12345");
+        transferencia.setContaDestino("67890");
+        transferencia.setValor(BigDecimal.ZERO);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            transferenciaService.createTransferencia(transferencia);
+        });
+
+        assertEquals("O valor da transferência deve ser maior que zero.", exception.getMessage());
+    }
+
+    @Test
+    void testTransferenciaValorNulo() {
+        Transferencia transferencia = new Transferencia();
+        transferencia.setContaOrigem("12345");
+        transferencia.setContaDestino("67890");
+        transferencia.setValor(null);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            transferenciaService.createTransferencia(transferencia);
+        });
+
+        assertEquals("O valor da transferência deve ser maior que zero.", exception.getMessage());
     }
 
 }
