@@ -7,6 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 
+/**
+ * A classe SwaggerConfig foi criada com o objetivo de disponibiliza uma documentação de API
+ * 
+ * @author Willian Noronha
+ * 
+ */
 @Configuration
 @OpenAPIDefinition(
     info = @Info(

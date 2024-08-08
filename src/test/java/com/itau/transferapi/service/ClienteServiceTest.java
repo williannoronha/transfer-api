@@ -17,6 +17,14 @@ import org.mockito.MockitoAnnotations;
 import com.itau.transferapi.model.Cliente;
 import com.itau.transferapi.repository.*;
 
+/**
+ * O objetivo da classe ClienteServiceTest
+ * é realizar a testes unitários da gestão de um novo Cliente
+ * embora apenas seja cadastrado um cliente e informações da conta
+ * 
+ * @author Willian Noronha
+ * 
+ */
 public class ClienteServiceTest {
 	
 	@InjectMocks
