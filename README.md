@@ -3,9 +3,13 @@
 ## Descrição
 A Transfer API é uma aplicação RESTful desenvolvida para gerenciar transferências bancárias entre contas. Esta API permite criar, visualizar e listar transferências, oferecendo uma solução robusta e segura para operações financeiras.
 
-![Jornada Transfer API](../transfer-api/doc/jornada-transfer-api.png)
+
+![Jornada Transfer API](/doc/jornada-transfer-api.png)
 
 Esse projeto foi pensado apenas para fins de teste de criação de projeto Java.
+
+Dados são persistidos em memória usando H@ Database.
+
 
 ## Tecnologias Utilizadas
 Java 21
@@ -35,8 +39,8 @@ Maven 3.9.8
 
 3. Executar a aplicação:
 
-```shelshl
-mvn spring-boot:run
+```sh
+    mvn spring-boot:run
 ```
 ## Endpoints da API
 
