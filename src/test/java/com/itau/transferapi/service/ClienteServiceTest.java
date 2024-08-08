@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -12,10 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.itau.transferapi.exception.ResourceNotFoundException;
 import com.itau.transferapi.model.Cliente;
 import com.itau.transferapi.repository.*;
-import com.itau.transferapi.service.*;
 
 public class ClienteServiceTest {
 	
@@ -31,40 +31,43 @@ public class ClienteServiceTest {
     }
 
     @Test
-    public void testSalvarClienteSucesso() {
-        Cliente cliente = new Cliente();
-        cliente.setNome("Maria das Dores");
-        cliente.setNumeroConta("17583-5");
-        cliente.setSaldo(BigDecimal.valueOf(1000.00));
-
+    void testCreateCliente() {
+        Cliente cliente = new Cliente("Bernadete", "123456", new BigDecimal("1000.00"));
         when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
 
-        Cliente result = clienteService.cadastrarCliente(cliente);
-        assertNotNull(result);
-        assertEquals("Maria das Dores", result.getNome());
+        Cliente createdCliente = clienteService.createCliente(cliente);
+
+        assertEquals("Bernadete", createdCliente.getNome());
+        assertEquals("123456", createdCliente.getNumeroConta());
+        assertEquals(new BigDecimal("1000.00"), createdCliente.getSaldo());
+        verify(clienteRepository, times(1)).save(cliente);
     }
 
     @Test
-    public void testBuscarClientePorNumeroContaSucesso() {
-        Cliente cliente = new Cliente();
-        cliente.setNome("Maria das Dores");
-        cliente.setNumeroConta("17583-5");
-        cliente.setSaldo(BigDecimal.valueOf(1000.00));
+    void testGetAllClientes() {
+        List<Cliente> clientes = Arrays.asList(
+                new Cliente("Bernadete", "123456", new BigDecimal("1000.00")),
+                new Cliente("Maria", "654321", new BigDecimal("2000.00"))
+        );
+        when(clienteRepository.findAll()).thenReturn(clientes);
 
-        when(clienteRepository.findByNumeroConta("17583-5")).thenReturn(Optional.of(cliente));
+        List<Cliente> result = clienteService.findAllClientes();
 
-        Cliente result = clienteService.buscarPorNumeroConta("17583-5");
-        assertNotNull(result);
-        assertEquals("Maria das Dores", result.getNome());
+        assertEquals(2, result.size());
+        verify(clienteRepository, times(1)).findAll();
     }
 
     @Test
-    public void testBuscarClientePorNumeroContaNaoEncontrado() {
-        when(clienteRepository.findByNumeroConta("17583-5")).thenReturn(Optional.empty());
+    void testGetClienteByNumeroConta() {
+        Cliente cliente = new Cliente("Bernadete", "123456", new BigDecimal("1000.00"));
+        when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(cliente));
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            clienteService.buscarPorNumeroConta("17583-5");
-        });
-    }
+        Cliente result = clienteService.getClienteByNumeroConta("123456");
+
+        assertNotNull(result);
+        assertEquals("Bernadete", result.getNome());
+        assertEquals("123456", result.getNumeroConta());
+        verify(clienteRepository, times(1)).findByNumeroConta("123456");
+    }    
 
 }

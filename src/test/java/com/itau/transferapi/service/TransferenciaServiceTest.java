@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,52 +38,57 @@ public class TransferenciaServiceTest {
     }
 
     @Test
-    public void testRealizarTransferenciaSucesso() {
-        Cliente origem = new Cliente();
-        origem.setNumeroConta("17583-5");
-        origem.setSaldo(BigDecimal.valueOf(5000.00));
+    void testCreateTransferencia() {
+        Cliente contaOrigem = new Cliente("Bernadete", "123456", new BigDecimal("1000.00"));
+        Cliente contaDestino = new Cliente("Maria", "654321", new BigDecimal("500.00"));
+        Transferencia transferencia = new Transferencia("123456", "654321", new BigDecimal("200.00"), null, true);
 
-        Cliente destino = new Cliente();
-        destino.setNumeroConta("67890");
-        destino.setSaldo(BigDecimal.valueOf(1000.00));
+        when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(contaOrigem));
+        when(clienteRepository.findByNumeroConta("654321")).thenReturn(Optional.of(contaDestino));
+        when(transferenciaRepository.save(any(Transferencia.class))).thenReturn(transferencia);
 
-        when(clienteRepository.findByNumeroConta("17583-5")).thenReturn(Optional.of(origem));
-        when(clienteRepository.findByNumeroConta("67890")).thenReturn(Optional.of(destino));
-        when(transferenciaRepository.save(any(Transferencia.class))).thenReturn(new Transferencia("17583-5", "67890", BigDecimal.valueOf(100.00), LocalDateTime.now(), true));
+        Transferencia result = transferenciaService.createTransferencia(transferencia);
 
-        Transferencia result = transferenciaService.realizarTransferencia("17583-5", "67890", BigDecimal.valueOf(100.00));
-        assertNotNull(result);
         assertTrue(result.getSucesso());
-        verify(clienteRepository, times(1)).save(origem);
-        verify(clienteRepository, times(1)).save(destino);
+        assertEquals(new BigDecimal("800.00"), contaOrigem.getSaldo());
+        assertEquals(new BigDecimal("700.00"), contaDestino.getSaldo());
+        verify(clienteRepository, times(1)).save(contaOrigem);
+        verify(clienteRepository, times(1)).save(contaDestino);
+        verify(transferenciaRepository, times(1)).save(transferencia);
     }
 
     @Test
-    public void testRealizarTransferenciaSaldoInsuficiente() {
-        Cliente origem = new Cliente();
-        origem.setNumeroConta("17583-5");
-        origem.setSaldo(BigDecimal.valueOf(50.00));
+    void testCreateTransferenciaInsufficientFunds() {
+        Cliente contaOrigem = new Cliente("Bernadete", "123456", new BigDecimal("100.00"));
+        Cliente contaDestino = new Cliente("Maria", "654321", new BigDecimal("500.00"));
+        Transferencia transferencia = new Transferencia("123456", "654321", new BigDecimal("200.00"), null, false);
 
-        Cliente destino = new Cliente();
-        destino.setNumeroConta("67890");
-        destino.setSaldo(BigDecimal.valueOf(1000.00));
+        when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(contaOrigem));
+        when(clienteRepository.findByNumeroConta("654321")).thenReturn(Optional.of(contaDestino));
+        when(transferenciaRepository.save(any(Transferencia.class))).thenReturn(transferencia);
 
-        when(clienteRepository.findByNumeroConta("17583-5")).thenReturn(Optional.of(origem));
-        when(clienteRepository.findByNumeroConta("67890")).thenReturn(Optional.of(destino));
+        Transferencia result = transferenciaService.createTransferencia(transferencia);
 
-        assertThrows(InsufficientFundsException.class, () -> {
-            transferenciaService.realizarTransferencia("17583-5", "67890", BigDecimal.valueOf(100.00));
-        });
+        assertFalse(result.getSucesso());
+        assertEquals(new BigDecimal("100.00"), contaOrigem.getSaldo());
+        assertEquals(new BigDecimal("500.00"), contaDestino.getSaldo());
+        verify(clienteRepository, times(0)).save(contaOrigem);
+        verify(clienteRepository, times(0)).save(contaDestino);
+        verify(transferenciaRepository, times(1)).save(transferencia);
     }
 
     @Test
-    public void testBuscarHistoricoTransferenciasSucesso() {
-        Transferencia transferencia = new Transferencia("17583-5", "67890", BigDecimal.valueOf(100.00), LocalDateTime.now(), true);
-        when(transferenciaRepository.findByContaOrigemOrContaDestinoOrderByDataDesc("17583-5", "17583-5")).thenReturn(Collections.singletonList(transferencia));
+    void testGetTransferenciasByNumeroConta() {
+        List<Transferencia> transferencias = Arrays.asList(
+                new Transferencia("123456", "654321", new BigDecimal("200.00"), null, true),
+                new Transferencia("123456", "987654", new BigDecimal("100.00"), null, true)
+        );
+        when(transferenciaRepository.findByContaOrigemOrContaDestinoOrderByDataDesc("123456", "123456")).thenReturn(transferencias);
 
-        List<Transferencia> result = transferenciaService.buscarHistoricoTransferencias("17583-5");
-        assertNotNull(result);
-        assertEquals(1, result.size());
+        List<Transferencia> result = transferenciaService.getTransferenciasByNumeroConta("123456");
+
+        assertEquals(2, result.size());
+        verify(transferenciaRepository, times(1)).findByContaOrigemOrContaDestinoOrderByDataDesc("123456", "123456");
     }
 
 }

@@ -27,20 +27,17 @@ public class TransferenciaController {
 	@PostMapping
 	@Operation(
 	        summary = "Realiza uma transferência entre contas",
-	        description = "Permite realizar uma transferência entre duas contas.",
+	        description = "Permite realizar uma transferência entre duas contas. Porém, o limite de transferência é de até R$10.000,00",
 	        responses = {
 	            @ApiResponse(responseCode = "200", description = "Transferência realizada com sucesso"),
 	            @ApiResponse(responseCode = "400", description = "Erro na solicitação"),
-	            @ApiResponse(responseCode = "404", description = "Conta não encontrada")
+	            @ApiResponse(responseCode = "404", description = "Conta não encontrada"),
+	            @ApiResponse(responseCode = "500", description = "Limite Excedido")
 	        }
 	    )
-    public ResponseEntity<Transferencia> realizarTransferencia(@RequestBody Transferencia transferencia) {
-        Transferencia novaTransferencia = transferenciaService.realizarTransferencia(
-                transferencia.getContaOrigem(),
-                transferencia.getContaDestino(),
-                transferencia.getValor()
-        );
-        return ResponseEntity.ok(novaTransferencia);
+    public ResponseEntity<Transferencia> createTransferencia(@RequestBody Transferencia transferencia) {
+		Transferencia createdTransferencia = transferenciaService.createTransferencia(transferencia);
+        return ResponseEntity.ok(createdTransferencia);
     }
 
     @GetMapping("/{numeroConta}")
@@ -53,8 +50,9 @@ public class TransferenciaController {
 	            @ApiResponse(responseCode = "404", description = "Conta não encontrada ou informações nulas")
 	        }
 	    )
-    public ResponseEntity<List<Transferencia>> buscarHistoricoTransferencias(@PathVariable String numeroConta) {
-        return ResponseEntity.ok(transferenciaService.buscarHistoricoTransferencias(numeroConta));
+    public ResponseEntity<List<Transferencia>> getTransferenciasByNumeroConta(@PathVariable String numeroConta) {
+    	List<Transferencia> transferencias = transferenciaService.getTransferenciasByNumeroConta(numeroConta);
+        return ResponseEntity.ok(transferencias);
     }
 
 }
