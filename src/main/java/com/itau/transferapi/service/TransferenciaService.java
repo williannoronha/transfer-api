@@ -34,31 +34,41 @@ public class TransferenciaService {
 
         if (transferencia.getValor().compareTo(new BigDecimal(10000)) > 0) {
             throw new IllegalArgumentException("Valor da transferência excede o limite de R$ 10.000,00.");
-        }   
-    	
-        Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferencia.getContaOrigem())
-                .orElseThrow(() -> new ResourceNotFoundException("Conta origem não encontrada"));
-        Cliente contaDestino = clienteRepository.findByNumeroConta(transferencia.getContaDestino())
-                .orElseThrow(() -> new ResourceNotFoundException("Conta destino não encontrada"));
+        }       	
         
-        if (contaOrigem == null || contaDestino == null) {
-            throw new IllegalArgumentException("Conta origem ou destino não encontrada.");
-        }
-        
-        if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {
-            throw new InsufficientFundsException("Saldo insuficiente na conta de origem.");
-        }
 
-        if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {
+        try {
+            // Verificações e execução da transferência
+        	Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferencia.getContaOrigem())
+                    .orElseThrow(() -> new ResourceNotFoundException("Conta origem não encontrada"));
+            Cliente contaDestino = clienteRepository.findByNumeroConta(transferencia.getContaDestino())
+                    .orElseThrow(() -> new ResourceNotFoundException("Conta destino não encontrada"));
+            
+            if (contaOrigem == null || contaDestino == null) {
+                throw new IllegalArgumentException("Conta origem ou destino não encontrada.");
+            }
+            
+            if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {
+                throw new InsufficientFundsException("Saldo insuficiente na conta de origem.");
+            }
+
+            if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {
+                transferencia.setSucesso(false);
+            } else {
+                contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(transferencia.getValor()));
+                contaDestino.setSaldo(contaDestino.getSaldo().add(transferencia.getValor()));
+                clienteRepository.save(contaOrigem);
+                clienteRepository.save(contaDestino);
+                transferencia.setSucesso(true);
+            }
+        } catch (InsufficientFundsException | IllegalArgumentException e) {
+            // Marcar a transferência como falha e salvar no banco de dados
             transferencia.setSucesso(false);
-        } else {
-            contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(transferencia.getValor()));
-            contaDestino.setSaldo(contaDestino.getSaldo().add(transferencia.getValor()));
-            clienteRepository.save(contaOrigem);
-            clienteRepository.save(contaDestino);
-            transferencia.setSucesso(true);
+            transferenciaRepository.save(transferencia);
+            throw e;
         }
-
+        
+        transferencia.setSucesso(true);
         return transferenciaRepository.save(transferencia);
     }
 
