@@ -36,8 +36,8 @@ public class ClienteController {
 	            @ApiResponse(responseCode = "400", description = "Erro na inclusão")
 	        }
 	    )
-    public ResponseEntity<Cliente> cadastrarCliente(@Valid @RequestBody Cliente cliente) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.cadastrarCliente(cliente));
+    public ResponseEntity<Cliente> createCliente(@Valid @RequestBody Cliente cliente) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.createCliente(cliente));
     }
 
     @GetMapping
@@ -49,8 +49,8 @@ public class ClienteController {
 	            @ApiResponse(responseCode = "400", description = "Erro na busca")
 	        }
 	    )
-    public ResponseEntity<List<Cliente>> listarClientes() {
-        return ResponseEntity.ok(clienteService.listarClientes());
+    public ResponseEntity<List<Cliente>> getAllClientes() {
+        return ResponseEntity.ok(clienteService.findAllClientes());
     }
 
     @GetMapping("/{numeroConta}")
@@ -62,8 +62,12 @@ public class ClienteController {
 	            @ApiResponse(responseCode = "400", description = "Erro na busca")
 	        }
 	    )
-    public ResponseEntity<Cliente> buscarPorNumeroConta(@PathVariable String numeroConta) {
-        return ResponseEntity.ok(clienteService.buscarPorNumeroConta(numeroConta));
+    public ResponseEntity<Cliente> getClienteByNumeroConta(@PathVariable String numeroConta) {
+    	Cliente cliente = clienteService.getClienteByNumeroConta(numeroConta);
+        if (cliente == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(cliente);
     }
 
 }

@@ -9,5 +9,7 @@ import com.itau.transferapi.model.Cliente;
 public interface IClienteRepository extends JpaRepository<Cliente, Long>{
 	
 	Optional<Cliente> findByNumeroConta(String numeroConta);
+	
+	boolean existsByNumeroConta(String numeroConta);
 
 }

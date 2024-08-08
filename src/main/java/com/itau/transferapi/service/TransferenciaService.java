@@ -1,7 +1,6 @@
 package com.itau.transferapi.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,29 +26,38 @@ public class TransferenciaService {
     private ITransferenciaRepository transferenciaRepository;
 
     @Transactional
-    public Transferencia realizarTransferencia(String contaOrigem, String contaDestino, BigDecimal valor) {
-        Cliente clienteOrigem = clienteRepository.findByNumeroConta(contaOrigem)
+    public Transferencia createTransferencia(Transferencia transferencia) {
+        Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferencia.getContaOrigem())
                 .orElseThrow(() -> new ResourceNotFoundException("Conta origem não encontrada"));
-        Cliente clienteDestino = clienteRepository.findByNumeroConta(contaDestino)
+        Cliente contaDestino = clienteRepository.findByNumeroConta(transferencia.getContaDestino())
                 .orElseThrow(() -> new ResourceNotFoundException("Conta destino não encontrada"));
-
-        if (clienteOrigem.getSaldo().compareTo(valor) < 0) {
-            throw new InsufficientFundsException("Saldo insuficiente");
+        
+        if (contaOrigem == null || contaDestino == null) {
+            throw new IllegalArgumentException("Conta origem ou destino não encontrada.");
         }
 
-        clienteOrigem.setSaldo(clienteOrigem.getSaldo().subtract(valor));
-        clienteDestino.setSaldo(clienteDestino.getSaldo().add(valor));
+        if (transferencia.getValor().compareTo(new BigDecimal(10000)) > 0) {
+            throw new IllegalArgumentException("Valor da transferência excede o limite de R$ 10.000,00.");
+        }
+        
+        if (transferencia.getValor().compareTo(new BigDecimal(0)) <= 0) {
+            new InsufficientFundsException("Necessário informar um valor para transferência.");
+        }
 
-        Transferencia transferencia = new Transferencia(contaOrigem, contaDestino, valor, LocalDateTime.now(), true);
-        transferenciaRepository.save(transferencia);
+        if (contaOrigem.getSaldo().compareTo(transferencia.getValor()) < 0) {
+            transferencia.setSucesso(false);
+        } else {
+            contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(transferencia.getValor()));
+            contaDestino.setSaldo(contaDestino.getSaldo().add(transferencia.getValor()));
+            clienteRepository.save(contaOrigem);
+            clienteRepository.save(contaDestino);
+            transferencia.setSucesso(true);
+        }
 
-        clienteRepository.save(clienteOrigem);
-        clienteRepository.save(clienteDestino);
-
-        return transferencia;
+        return transferenciaRepository.save(transferencia);
     }
 
-    public List<Transferencia> buscarHistoricoTransferencias(String numeroConta) {
+    public List<Transferencia> getTransferenciasByNumeroConta(String numeroConta) {
         return transferenciaRepository.findByContaOrigemOrContaDestinoOrderByDataDesc(numeroConta, numeroConta);
     }
 

@@ -18,15 +18,23 @@ public class ClienteService {
 	@Autowired
     private IClienteRepository clienteRepository;
 	
-	public Cliente cadastrarCliente(Cliente cliente) {
+	public Cliente createCliente(Cliente cliente) {
+		if (cliente.getNome() == null || cliente.getNumeroConta() == null || cliente.getSaldo() == null) {
+            throw new IllegalArgumentException("Nome, número da conta e saldo são obrigatórios.");
+        }
+
+        if (clienteRepository.existsByNumeroConta(cliente.getNumeroConta())) {
+            throw new IllegalArgumentException("Número da conta já existe.");
+        }
+
         return clienteRepository.save(cliente);
     }
 
-    public List<Cliente> listarClientes() {
+    public List<Cliente> findAllClientes() {
         return clienteRepository.findAll();
     }
 
-    public Cliente buscarPorNumeroConta(String numeroConta) {
+    public Cliente getClienteByNumeroConta(String numeroConta) {
         return clienteRepository.findByNumeroConta(numeroConta)
                                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
