@@ -4,7 +4,7 @@
 A Transfer API é uma aplicação RESTful desenvolvida para gerenciar transferências bancárias entre contas. Esta API permite criar, visualizar e listar transferências, oferecendo uma solução robusta e segura para operações financeiras.
 
 
-![Jornada Transfer API](/doc/jornada-transfer-api.png)
+![Jornada Transfer API](/doc/jornada-sequencia-transfer-api.png)
 
 Esse projeto foi pensado apenas para fins de teste de criação de projeto Java.
 
