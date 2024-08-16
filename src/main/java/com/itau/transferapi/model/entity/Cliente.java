@@ -1,4 +1,4 @@
-package com.itau.transferapi.model;
+package com.itau.transferapi.model.entity;
 
 import java.math.BigDecimal;
 
@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,18 +19,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class Cliente {
 	
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)	
 	@Schema(description = "ID da cliente", example = "1")
     private Long id;
 
+	@NotNull
     @Column(unique = true, nullable = false)
+    @Size(min = 2, max = 100)
     @Schema(description = "Nome do cliente", example = "1")
     private String nome;
 
+	@NotNull
     @Column(unique = true, nullable = false)
+    @Size(min = 10, max = 10)
     @Schema(description = "Número da conta do cliente", example = "1")
     private String numeroConta;
 
+	@NotNull
     @Schema(description = "Saldo do cliente", example = "1")
     private BigDecimal saldo;
     

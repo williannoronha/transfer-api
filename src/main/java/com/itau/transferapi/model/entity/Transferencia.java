@@ -1,4 +1,4 @@
-package com.itau.transferapi.model;
+package com.itau.transferapi.model.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,12 +22,15 @@ public class Transferencia {
 	@Schema(description = "ID da transferência", example = "1")
     private Long id;
 
+	@NotNull
 	@Schema(description = "Número da conta de origem", example = "12345")
     private String contaOrigem;
 	
+	@NotNull
 	@Schema(description = "Número da conta de destino", example = "67890")
     private String contaDestino;
 	
+	@NotNull
 	@Schema(description = "Valor da transferência", example = "100.0")
     private BigDecimal valor;
 	
