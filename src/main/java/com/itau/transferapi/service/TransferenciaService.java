@@ -29,11 +29,12 @@ public class TransferenciaService {
     @Transactional
     public Transferencia createTransferencia(TransferenciaDTO transferenciaDTO) {
     	
-    	if (transferenciaDTO.getValor() == null || transferenciaDTO.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+
+    	if (transferenciaDTO.valor() == null || transferenciaDTO.valor().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("O valor da transferência deve ser maior que zero.");
         }
 
-        if (transferenciaDTO.getValor().compareTo(new BigDecimal(10000)) > 0) {
+        if (transferenciaDTO.valor().compareTo(new BigDecimal(10000)) > 0) {
             throw new IllegalArgumentException("Valor da transferência excede o limite de R$ 10.000,00.");
         }       	
         
@@ -41,26 +42,28 @@ public class TransferenciaService {
 
         try {
             // Verificações e execução da transferência
-        	Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferenciaDTO.getContaOrigem())
+        	Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferenciaDTO.contaOrigem())
                     .orElseThrow(() -> new ResourceNotFoundException("Conta origem não encontrada"));
-            Cliente contaDestino = clienteRepository.findByNumeroConta(transferenciaDTO.getContaDestino())
+            Cliente contaDestino = clienteRepository.findByNumeroConta(transferenciaDTO.contaDestino())
+
                     .orElseThrow(() -> new ResourceNotFoundException("Conta destino não encontrada"));
             
             if (contaOrigem == null || contaDestino == null) {
                 throw new IllegalArgumentException("Conta origem ou destino não encontrada.");
-            }
-            
-            if (contaOrigem.getSaldo().compareTo(transferenciaDTO.getValor()) < 0) {
+            }            
+
+            if (contaOrigem.getSaldo().compareTo(transferenciaDTO.valor()) < 0) {
                 throw new InsufficientFundsException("Saldo insuficiente na conta de origem.");
             }
 
-            contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(transferenciaDTO.getValor()));
-            contaDestino.setSaldo(contaDestino.getSaldo().add(transferenciaDTO.getValor()));
+            contaOrigem.setSaldo(contaOrigem.getSaldo().subtract(transferenciaDTO.valor()));
+            contaDestino.setSaldo(contaDestino.getSaldo().add(transferenciaDTO.valor()));
 
             
-            transferencia.setContaOrigem(transferenciaDTO.getContaOrigem());
-            transferencia.setContaDestino(transferenciaDTO.getContaDestino());
-            transferencia.setValor(transferenciaDTO.getValor());
+            transferencia.setContaOrigem(transferenciaDTO.contaOrigem());
+            transferencia.setContaDestino(transferenciaDTO.contaDestino());
+            transferencia.setValor(transferenciaDTO.valor());
+
             transferencia.setData(LocalDateTime.now());
             transferencia.setSucesso(true);
 

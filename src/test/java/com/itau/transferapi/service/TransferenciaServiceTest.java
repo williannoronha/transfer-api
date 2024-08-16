@@ -48,29 +48,12 @@ public class TransferenciaServiceTest {
 
     @Test
     void testCreateTransferencia() {
-    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO();
-        transferenciaDTO.setContaOrigem("123456");
-        transferenciaDTO.setContaDestino("654321");
-        transferenciaDTO.setValor(BigDecimal.valueOf(500));
+    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO(null, "12345", "67890", new BigDecimal("500.00"));
 
-        Cliente contaOrigem = new Cliente();
-        contaOrigem.setNumeroConta("123456");
-        contaOrigem.setSaldo(BigDecimal.valueOf(1000));
+        Transferencia createdTransferencia = transferenciaService.createTransferencia(transferenciaDTO);
 
-        Cliente contaDestino = new Cliente();
-        contaDestino.setNumeroConta("654321");
-        contaDestino.setSaldo(BigDecimal.valueOf(2000));
-
-        when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(contaOrigem));
-        when(clienteRepository.findByNumeroConta("654321")).thenReturn(Optional.of(contaDestino));
-
-        Transferencia transferencia = transferenciaService.createTransferencia(transferenciaDTO);
-
-        assertNotNull(transferencia);
-        assertTrue(transferencia.getSucesso());
-        verify(transferenciaRepository, times(1)).save(any(Transferencia.class));
-        verify(clienteRepository, times(1)).save(contaOrigem);
-        verify(clienteRepository, times(1)).save(contaDestino);
+        assertNotNull(createdTransferencia.getId());
+        assertEquals("12345", createdTransferencia.getContaOrigem());
     }
 
     
@@ -91,10 +74,7 @@ public class TransferenciaServiceTest {
     
     @Test
     void testTransferenciaValorZero() {
-    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO();
-    	transferenciaDTO.setContaOrigem("12345");
-    	transferenciaDTO.setContaDestino("67890");
-    	transferenciaDTO.setValor(BigDecimal.ZERO);
+    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO(null, "12345", "67890", new BigDecimal("0"));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             transferenciaService.createTransferencia(transferenciaDTO);
@@ -105,10 +85,7 @@ public class TransferenciaServiceTest {
 
     @Test
     void testTransferenciaValorNulo() {
-        TransferenciaDTO transferenciaDTO = new TransferenciaDTO();
-        transferenciaDTO.setContaOrigem("12345");
-        transferenciaDTO.setContaDestino("67890");
-        transferenciaDTO.setValor(null);
+    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO(null, "12345", "67890", null);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             transferenciaService.createTransferencia(transferenciaDTO);

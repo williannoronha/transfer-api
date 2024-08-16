@@ -81,7 +81,7 @@ A documentação completa da API pode ser acessada via Swagger UI após iniciar 
     ```
 
 - Histórico das transferências
-    - GET /api/v1/transferencias/numeroConta
+    - GET /api/v1/transferencias/historico/numeroConta
 
 
 ## Configuração do Swagger
