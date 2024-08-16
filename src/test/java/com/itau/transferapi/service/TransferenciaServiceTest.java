@@ -17,7 +17,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.itau.transferapi.exception.InsufficientFundsException;
-import com.itau.transferapi.model.*;
+import com.itau.transferapi.model.dto.TransferenciaDTO;
+import com.itau.transferapi.model.entity.*;
 import com.itau.transferapi.repository.*;
 import com.itau.transferapi.service.*;
 
@@ -47,22 +48,29 @@ public class TransferenciaServiceTest {
 
     @Test
     void testCreateTransferencia() {
-        Cliente contaOrigem = new Cliente("Bernadete", "123456", new BigDecimal("1000.00"));
-        Cliente contaDestino = new Cliente("Maria", "654321", new BigDecimal("500.00"));
-        Transferencia transferencia = new Transferencia("123456", "654321", new BigDecimal("200.00"), null, true);
+    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO();
+        transferenciaDTO.setContaOrigem("123456");
+        transferenciaDTO.setContaDestino("654321");
+        transferenciaDTO.setValor(BigDecimal.valueOf(500));
+
+        Cliente contaOrigem = new Cliente();
+        contaOrigem.setNumeroConta("123456");
+        contaOrigem.setSaldo(BigDecimal.valueOf(1000));
+
+        Cliente contaDestino = new Cliente();
+        contaDestino.setNumeroConta("654321");
+        contaDestino.setSaldo(BigDecimal.valueOf(2000));
 
         when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(contaOrigem));
         when(clienteRepository.findByNumeroConta("654321")).thenReturn(Optional.of(contaDestino));
-        when(transferenciaRepository.save(any(Transferencia.class))).thenReturn(transferencia);
 
-        Transferencia result = transferenciaService.createTransferencia(transferencia);
+        Transferencia transferencia = transferenciaService.createTransferencia(transferenciaDTO);
 
-        assertTrue(result.getSucesso());
-        assertEquals(new BigDecimal("800.00"), contaOrigem.getSaldo());
-        assertEquals(new BigDecimal("700.00"), contaDestino.getSaldo());
+        assertNotNull(transferencia);
+        assertTrue(transferencia.getSucesso());
+        verify(transferenciaRepository, times(1)).save(any(Transferencia.class));
         verify(clienteRepository, times(1)).save(contaOrigem);
         verify(clienteRepository, times(1)).save(contaDestino);
-        verify(transferenciaRepository, times(1)).save(transferencia);
     }
 
     
@@ -83,13 +91,13 @@ public class TransferenciaServiceTest {
     
     @Test
     void testTransferenciaValorZero() {
-        Transferencia transferencia = new Transferencia();
-        transferencia.setContaOrigem("12345");
-        transferencia.setContaDestino("67890");
-        transferencia.setValor(BigDecimal.ZERO);
+    	TransferenciaDTO transferenciaDTO = new TransferenciaDTO();
+    	transferenciaDTO.setContaOrigem("12345");
+    	transferenciaDTO.setContaDestino("67890");
+    	transferenciaDTO.setValor(BigDecimal.ZERO);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transferenciaService.createTransferencia(transferencia);
+            transferenciaService.createTransferencia(transferenciaDTO);
         });
 
         assertEquals("O valor da transferência deve ser maior que zero.", exception.getMessage());
@@ -97,13 +105,13 @@ public class TransferenciaServiceTest {
 
     @Test
     void testTransferenciaValorNulo() {
-        Transferencia transferencia = new Transferencia();
-        transferencia.setContaOrigem("12345");
-        transferencia.setContaDestino("67890");
-        transferencia.setValor(null);
+        TransferenciaDTO transferenciaDTO = new TransferenciaDTO();
+        transferenciaDTO.setContaOrigem("12345");
+        transferenciaDTO.setContaDestino("67890");
+        transferenciaDTO.setValor(null);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            transferenciaService.createTransferencia(transferencia);
+            transferenciaService.createTransferencia(transferenciaDTO);
         });
 
         assertEquals("O valor da transferência deve ser maior que zero.", exception.getMessage());

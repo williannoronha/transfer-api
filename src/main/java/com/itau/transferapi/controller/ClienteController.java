@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.itau.transferapi.model.Cliente;
+import com.itau.transferapi.model.dto.ClienteDTO;
+import com.itau.transferapi.model.entity.Cliente;
 import com.itau.transferapi.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,8 +48,8 @@ public class ClienteController {
 	            @ApiResponse(responseCode = "400", description = "Erro na inclusão")
 	        }
 	    )
-    public ResponseEntity<Cliente> createCliente(@Valid @RequestBody Cliente cliente) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.createCliente(cliente));
+    public ResponseEntity<Cliente> createCliente(@Valid @RequestBody ClienteDTO clienteDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.createCliente(clienteDTO));
     }
 
     @GetMapping

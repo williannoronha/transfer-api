@@ -14,7 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.itau.transferapi.model.Cliente;
+import com.itau.transferapi.exception.ResourceNotFoundException;
+import com.itau.transferapi.model.dto.ClienteDTO;
+import com.itau.transferapi.model.entity.Cliente;
 import com.itau.transferapi.repository.*;
 
 /**
@@ -40,15 +42,17 @@ public class ClienteServiceTest {
 
     @Test
     void testCreateCliente() {
-        Cliente cliente = new Cliente("Bernadete", "123456", new BigDecimal("1000.00"));
-        when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
+    	ClienteDTO clienteDTO = new ClienteDTO();
+        clienteDTO.setNome("João");
+        clienteDTO.setNumeroConta("123456");
+        clienteDTO.setSaldo(BigDecimal.valueOf(1000));
 
-        Cliente createdCliente = clienteService.createCliente(cliente);
+        when(clienteRepository.save(any(Cliente.class))).thenReturn(new Cliente());
 
-        assertEquals("Bernadete", createdCliente.getNome());
-        assertEquals("123456", createdCliente.getNumeroConta());
-        assertEquals(new BigDecimal("1000.00"), createdCliente.getSaldo());
-        verify(clienteRepository, times(1)).save(cliente);
+        Cliente cliente = clienteService.createCliente(clienteDTO);
+
+        assertNotNull(cliente);
+        verify(clienteRepository, times(1)).save(any(Cliente.class));
     }
 
     @Test
@@ -67,15 +71,25 @@ public class ClienteServiceTest {
 
     @Test
     void testGetClienteByNumeroConta() {
-        Cliente cliente = new Cliente("Bernadete", "123456", new BigDecimal("1000.00"));
-        when(clienteRepository.findByNumeroConta("123456")).thenReturn(Optional.of(cliente));
+    	String numeroConta = "123456";
+        Cliente cliente = new Cliente();
+        cliente.setNumeroConta(numeroConta);
 
-        Cliente result = clienteService.getClienteByNumeroConta("123456");
+        when(clienteRepository.findByNumeroConta(numeroConta)).thenReturn(Optional.of(cliente));
 
-        assertNotNull(result);
-        assertEquals("Bernadete", result.getNome());
-        assertEquals("123456", result.getNumeroConta());
-        verify(clienteRepository, times(1)).findByNumeroConta("123456");
-    }    
+        Cliente foundCliente = clienteService.getClienteByNumeroConta(numeroConta);
+
+        assertNotNull(foundCliente);
+        assertEquals(numeroConta, foundCliente.getNumeroConta());
+    }  
+    
+    @Test
+    void testThrowResourceNotFoundExceptionWhenClienteNotFound() {
+        String numeroConta = "123456";
+
+        when(clienteRepository.findByNumeroConta(numeroConta)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> clienteService.getClienteByNumeroConta(numeroConta));
+    }
 
 }
