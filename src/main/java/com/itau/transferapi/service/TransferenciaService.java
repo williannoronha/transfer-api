@@ -76,7 +76,7 @@ public class TransferenciaService {
             transferenciaRepository.save(transferencia);
             throw e;
         }        
-        
+
     }
 
     public List<Transferencia> getTransferenciasByNumeroConta(String numeroConta) {
