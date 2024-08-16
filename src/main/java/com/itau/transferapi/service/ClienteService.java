@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.itau.transferapi.exception.ResourceNotFoundException;
-import com.itau.transferapi.model.Cliente;
+import com.itau.transferapi.model.entity.Cliente;
+import com.itau.transferapi.model.dto.ClienteDTO;
 import com.itau.transferapi.repository.IClienteRepository;
 
 
@@ -18,14 +19,19 @@ public class ClienteService {
 	@Autowired
     private IClienteRepository clienteRepository;
 	
-	public Cliente createCliente(Cliente cliente) {
-		if (cliente.getNome() == null || cliente.getNumeroConta() == null || cliente.getSaldo() == null) {
+	public Cliente createCliente(ClienteDTO clienteDTO) {
+		if (clienteDTO.getNome() == null || clienteDTO.getNumeroConta() == null || clienteDTO.getSaldo() == null) {
             throw new IllegalArgumentException("Nome, número da conta e saldo são obrigatórios.");
         }
 
-        if (clienteRepository.existsByNumeroConta(cliente.getNumeroConta())) {
+        if (clienteRepository.existsByNumeroConta(clienteDTO.getNumeroConta())) {
             throw new IllegalArgumentException("Número da conta já existe.");
         }
+        
+        Cliente cliente = new Cliente();
+        cliente.setNome(clienteDTO.getNome());
+        cliente.setNumeroConta(clienteDTO.getNumeroConta());
+        cliente.setSaldo(clienteDTO.getSaldo());
 
         return clienteRepository.save(cliente);
     }
