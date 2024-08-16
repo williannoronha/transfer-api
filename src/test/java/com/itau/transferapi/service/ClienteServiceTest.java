@@ -42,10 +42,7 @@ public class ClienteServiceTest {
 
     @Test
     void testCreateCliente() {
-    	ClienteDTO clienteDTO = new ClienteDTO();
-        clienteDTO.setNome("João");
-        clienteDTO.setNumeroConta("123456");
-        clienteDTO.setSaldo(BigDecimal.valueOf(1000));
+    	ClienteDTO clienteDTO = new ClienteDTO("João", "123456", BigDecimal.valueOf(1000));
 
         when(clienteRepository.save(any(Cliente.class))).thenReturn(new Cliente());
 

@@ -20,18 +20,18 @@ public class ClienteService {
     private IClienteRepository clienteRepository;
 	
 	public Cliente createCliente(ClienteDTO clienteDTO) {
-		if (clienteDTO.getNome() == null || clienteDTO.getNumeroConta() == null || clienteDTO.getSaldo() == null) {
+		if (clienteDTO.nome() == null || clienteDTO.numeroConta() == null || clienteDTO.saldo() == null) {
             throw new IllegalArgumentException("Nome, número da conta e saldo são obrigatórios.");
         }
 
-        if (clienteRepository.existsByNumeroConta(clienteDTO.getNumeroConta())) {
+        if (clienteRepository.existsByNumeroConta(clienteDTO.numeroConta())) {
             throw new IllegalArgumentException("Número da conta já existe.");
         }
         
         Cliente cliente = new Cliente();
-        cliente.setNome(clienteDTO.getNome());
-        cliente.setNumeroConta(clienteDTO.getNumeroConta());
-        cliente.setSaldo(clienteDTO.getSaldo());
+        cliente.setNome(clienteDTO.nome());
+        cliente.setNumeroConta(clienteDTO.numeroConta());
+        cliente.setSaldo(clienteDTO.saldo());
 
         return clienteRepository.save(cliente);
     }
