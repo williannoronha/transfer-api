@@ -25,6 +25,7 @@ public class ClienteService {
         }
 
         if (clienteRepository.existsByNumeroConta(clienteDTO.numeroConta())) {
+
             throw new IllegalArgumentException("Número da conta já existe.");
         }
         
@@ -32,6 +33,7 @@ public class ClienteService {
         cliente.setNome(clienteDTO.nome());
         cliente.setNumeroConta(clienteDTO.numeroConta());
         cliente.setSaldo(clienteDTO.saldo());
+
 
         return clienteRepository.save(cliente);
     }

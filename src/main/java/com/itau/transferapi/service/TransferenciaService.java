@@ -29,6 +29,7 @@ public class TransferenciaService {
     @Transactional
     public Transferencia createTransferencia(TransferenciaDTO transferenciaDTO) {
     	
+
     	if (transferenciaDTO.valor() == null || transferenciaDTO.valor().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("O valor da transferência deve ser maior que zero.");
         }
@@ -44,12 +45,13 @@ public class TransferenciaService {
         	Cliente contaOrigem  = clienteRepository.findByNumeroConta(transferenciaDTO.contaOrigem())
                     .orElseThrow(() -> new ResourceNotFoundException("Conta origem não encontrada"));
             Cliente contaDestino = clienteRepository.findByNumeroConta(transferenciaDTO.contaDestino())
+
                     .orElseThrow(() -> new ResourceNotFoundException("Conta destino não encontrada"));
             
             if (contaOrigem == null || contaDestino == null) {
                 throw new IllegalArgumentException("Conta origem ou destino não encontrada.");
-            }
-            
+            }            
+
             if (contaOrigem.getSaldo().compareTo(transferenciaDTO.valor()) < 0) {
                 throw new InsufficientFundsException("Saldo insuficiente na conta de origem.");
             }
@@ -61,6 +63,7 @@ public class TransferenciaService {
             transferencia.setContaOrigem(transferenciaDTO.contaOrigem());
             transferencia.setContaDestino(transferenciaDTO.contaDestino());
             transferencia.setValor(transferenciaDTO.valor());
+
             transferencia.setData(LocalDateTime.now());
             transferencia.setSucesso(true);
 
